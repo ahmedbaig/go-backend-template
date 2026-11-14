@@ -4,11 +4,14 @@ go 1.27.3
 
 require (
 	github.com/ahmedbaig/go-backend-config v0.1.0
-	github.com/ahmedbaig/go-backend-db v0.1.0
-	github.com/ahmedbaig/go-backend-http v0.1.0
+	github.com/ahmedbaig/go-backend-db v0.2.0
+	github.com/ahmedbaig/go-backend-db-handler/types v0.1.0
+	github.com/ahmedbaig/go-backend-http v0.2.0
 	github.com/ahmedbaig/go-backend-logging v0.1.0
 	github.com/ahmedbaig/go-backend-monitoring v0.1.0
+	github.com/ahmedbaig/go-backend-template/api v0.0.0-00010101000000-000000000000
 	github.com/ahmedbaig/go-backend-testing v0.1.0
+	github.com/ahmedbaig/go-backend-types v0.1.0
 )
 
 require (
@@ -31,3 +34,5 @@ require (
 	golang.org/x/time v0.16.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+replace github.com/ahmedbaig/go-backend-template/api => ./api

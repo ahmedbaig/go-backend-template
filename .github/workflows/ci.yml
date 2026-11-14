@@ -7,8 +7,12 @@ on:
 jobs:
   test:
     uses: ahmedbaig/go-backend-pipelines/.github/workflows/go-ci.yml@main
+  api:
+    uses: ahmedbaig/go-backend-pipelines/.github/workflows/go-ci.yml@main
+    with:
+      working-directory: api
   docker:
-    needs: test
+    needs: [test, api]
     if: github.event_name == 'push'
     uses: ahmedbaig/go-backend-pipelines/.github/workflows/docker.yml@main
     permissions:
