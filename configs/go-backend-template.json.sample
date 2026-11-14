@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "host": "0.0.0.0",
+  "environment": "localhost",
+  "requestTimeout": "30s",
+  "shutdownTimeout": "15s",
+  "corsOrigins": ["http://localhost:3000"],
+  "dbHandler": { "url": "http://localhost:8090", "apiKey": "change-me", "timeout": "30s" },
+  "services": { "users": "" }
+}

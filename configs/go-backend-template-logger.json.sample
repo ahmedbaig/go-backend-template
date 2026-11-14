@@ -1,0 +1,6 @@
+{
+  "logDirectory": "var/logs",
+  "minimumLogLevel": "debug",
+  "logToFile": false,
+  "logToConsole": true
+}

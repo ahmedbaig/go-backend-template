@@ -1,0 +1,16 @@
+name: ci
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+jobs:
+  test:
+    uses: ahmedbaig/go-backend-pipelines/.github/workflows/go-ci.yml@main
+  docker:
+    needs: test
+    if: github.event_name == 'push'
+    uses: ahmedbaig/go-backend-pipelines/.github/workflows/docker.yml@main
+    permissions:
+      contents: read
+      packages: write
