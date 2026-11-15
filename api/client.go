@@ -37,3 +37,7 @@ func (c *Client) DeletePost(ctx context.Context, id int64) error {
 func (c *Client) AdminInfo(ctx context.Context) (InfoResponse, error) {
 	return client.Get[InfoResponse](ctx, c.c, PathAdminInfo, nil)
 }
+
+func (c *Client) Session(ctx context.Context) (SessionResponse, error) {
+	return client.Get[SessionResponse](ctx, c.c, PathSession, nil)
+}

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/ahmedbaig/go-backend-http"
 	"github.com/ahmedbaig/go-backend-logging"
 	"github.com/ahmedbaig/go-backend-template/internal/appctx"
 	"github.com/ahmedbaig/go-backend-template/internal/config"
 	"github.com/ahmedbaig/go-backend-template/internal/http/routes"
+	"github.com/ahmedbaig/go-backend-template/internal/jobs"
 )
 
 var version = "dev"
@@ -42,8 +44,12 @@ func run(ctx context.Context) error {
 }
 
 func build(c config.App, log *slog.Logger) (*httpx.App, error) {
-	actx := appctx.New(c, log, version)
+	actx, err := appctx.New(c, log, version)
+	if err != nil {
+		return nil, err
+	}
 	if err := actx.RegisterProbes(); err != nil {
+		_ = actx.Close(context.Background())
 		return nil, err
 	}
 	opts := httpx.Options{
@@ -60,5 +66,24 @@ func build(c config.App, log *slog.Logger) (*httpx.App, error) {
 	}
 	app := httpx.New(opts)
 	routes.Register(app, actx)
+	app.OnShutdown(actx.Close)
+
+	runner := jobs.NewRunner(log, jobs.Job{
+		Name:     "db-capabilities",
+		Every:    c.Jobs.CapabilitiesEvery.Std(),
+		Jitter:   30 * time.Second,
+		Timeout:  10 * time.Second,
+		RunFirst: true,
+		Run: func(ctx context.Context) error {
+			caps, err := actx.DB.Capabilities(ctx)
+			if err != nil {
+				return err
+			}
+			log.InfoContext(ctx, "db-handler capabilities", slog.Int("databases", len(caps.Databases)), slog.Int("stores", len(caps.Stores)))
+			return nil
+		},
+	})
+	runner.Start(context.Background())
+	app.OnShutdown(runner.Stop)
 	return app, nil
 }

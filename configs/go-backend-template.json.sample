@@ -4,7 +4,17 @@
   "environment": "localhost",
   "requestTimeout": "30s",
   "shutdownTimeout": "15s",
-  "corsOrigins": ["http://localhost:3000"],
-  "dbHandler": { "url": "http://localhost:8090", "apiKey": "change-me", "timeout": "30s" },
+  "corsOrigins": ["http://localhost:5173"],
+  "dbHandler": {
+    "transport": "grpc",
+    "grpcAddr": "localhost:9090",
+    "url": "http://localhost:8090",
+    "apiKey": "change-me",
+    "timeout": "30s"
+  },
+  "redis": { "addr": "localhost:6379", "prefix": "go-backend-template:" },
+  "session": { "cookieName": "sid", "cookieDomain": "", "secure": false, "ttl": "168h", "devLogin": true },
+  "events": { "maxLen": 1000, "heartbeat": "15s" },
+  "jobs": { "capabilitiesEvery": "10m" },
   "services": { "users": "" }
 }
