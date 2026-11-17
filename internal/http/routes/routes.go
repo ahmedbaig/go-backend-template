@@ -14,25 +14,24 @@ func Register(app *httpx.App, ctx *appctx.Context) {
 	sess := controllers.NewSession(ctx.Sessions)
 	live := controllers.NewEvents(ctx.Events, ctx.Topics, ctx.Config.Events.Heartbeat.Std(), app.Draining())
 
-	root := app.Group("/api/v1", ctx.Sessions.Load())
-	root.Get("/session", httpx.HandlerFunc(sess.Get), session.Require())
-	root.Delete("/session", httpx.HandlerFunc(sess.Logout))
+	root := app.Group("", ctx.Sessions.Load())
+	root.Get(api.PathSession, httpx.HandlerFunc(sess.Get), session.Require())
+	root.Delete(api.PathSession, httpx.HandlerFunc(sess.Logout))
 	if ctx.Config.DevLoginEnabled() {
-		root.Post("/session/dev-login", httpx.HandlerFunc(sess.DevLogin))
+		root.Post(api.PathSessionDevLogin, httpx.HandlerFunc(sess.DevLogin))
 	}
 
 	v1 := root.Group("", session.Require())
-	v1.Get("/events", httpx.HandlerFunc(live.Stream))
+	v1.Get(api.PathEvents, httpx.HandlerFunc(live.Stream))
 
 	read := httpx.RequireFeature(api.ScopePostsRead)
 	write := httpx.RequireFeature(api.ScopePostsWrite)
-	p := v1.Group("/posts")
-	p.Get("", httpx.Handle(posts.List, httpx.NoBody()), read)
-	p.Post("", httpx.Handle(posts.Create), write)
-	p.Get("/{id}", httpx.Handle(posts.Get, httpx.NoBody()), read)
-	p.Patch("/{id}", httpx.Handle(posts.Update), write)
-	p.Delete("/{id}", httpx.HandlerFunc(posts.Delete), write)
+	v1.Get(api.PathPosts, httpx.Handle(posts.List, httpx.NoBody()), read)
+	v1.Post(api.PathPosts, httpx.Handle(posts.Create), write)
+	v1.Get(api.PathPost, httpx.Handle(posts.Get, httpx.NoBody()), read)
+	v1.Patch(api.PathPost, httpx.Handle(posts.Update), write)
+	v1.Delete(api.PathPost, httpx.HandlerFunc(posts.Delete), write)
 
-	admin := v1.Group("/admin", httpx.RequireRole("admin"))
-	admin.Get("/info", httpx.HandlerFunc(info(ctx)))
+	admin := v1.Group("", httpx.RequireRole(api.RoleAdmin))
+	admin.Get(api.PathAdminInfo, httpx.HandlerFunc(info(ctx)))
 }

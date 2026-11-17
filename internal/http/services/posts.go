@@ -11,10 +11,6 @@ import (
 	"github.com/ahmedbaig/go-backend-types"
 )
 
-type PostsService struct {
-	posts *db.Service[demo.Post]
-}
-
 func NewPostsService(c *db.Client) *PostsService {
 	return &PostsService{posts: demo.PostService(c)}
 }

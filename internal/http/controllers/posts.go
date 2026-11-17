@@ -10,11 +10,6 @@ import (
 	"github.com/ahmedbaig/go-backend-template/internal/http/services"
 )
 
-type Posts struct {
-	svc    *services.PostsService
-	events *events.Broker
-}
-
 func NewPosts(svc *services.PostsService, ev *events.Broker) *Posts {
 	return &Posts{svc: svc, events: ev}
 }
@@ -22,8 +17,6 @@ func NewPosts(svc *services.PostsService, ev *events.Broker) *Posts {
 func (c *Posts) publish(ctx context.Context, userID int64, typ string, data any) {
 	c.events.PublishOrLog(ctx, events.UserChannel(api.TopicPosts, userID), typ, data)
 }
-
-type created struct{ api.Post }
 
 func (created) StatusCode() int { return http.StatusCreated }
 

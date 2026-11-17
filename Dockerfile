@@ -5,9 +5,8 @@ WORKDIR /src
 RUN apk add --no-cache git ca-certificates tzdata
 COPY . .
 ARG CMD=./cmd/server
-ARG VERSION=dev
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/app ${CMD}
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/app ${CMD}
 
 FROM alpine:3.22
 RUN apk add --no-cache tini ca-certificates tzdata wget \

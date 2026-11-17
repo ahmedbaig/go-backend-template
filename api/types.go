@@ -2,12 +2,7 @@ package api
 
 import (
 	"github.com/ahmedbaig/go-backend-types"
-)
-
-const (
-	PathPosts     = "/api/v1/posts"
-	PathPost      = "/api/v1/posts/{id}"
-	PathAdminInfo = "/api/v1/admin/info"
+	"github.com/ahmedbaig/go-backend-types/client"
 )
 
 type Post struct {
@@ -48,4 +43,24 @@ type InfoResponse struct {
 	Version     string `json:"version"`
 	Environment string `json:"environment"`
 	Status      string `json:"status"`
+}
+
+type Client struct {
+	c *client.Client
+}
+
+type SessionResponse struct {
+	User types.User `json:"user"`
+}
+
+type DevLoginRequest struct {
+	ID       int64    `json:"id" validate:"omitempty,min=1"`
+	Email    string   `json:"email" validate:"required,email"`
+	Name     string   `json:"name" validate:"required,max=100"`
+	Roles    []string `json:"roles" validate:"max=20,dive,max=50"`
+	Features []string `json:"features" validate:"max=50,dive,max=50"`
+}
+
+type PostDeleted struct {
+	ID int64 `json:"id"`
 }

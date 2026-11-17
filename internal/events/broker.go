@@ -10,18 +10,9 @@ import (
 	"github.com/ahmedbaig/go-backend-http/sse"
 	"github.com/ahmedbaig/go-backend-proto/eventsx"
 	eventsv1 "github.com/ahmedbaig/go-backend-proto/gen/go/ahmedbaig/events/v1"
+	"github.com/ahmedbaig/go-backend-template/internal/constants"
 	"github.com/redis/go-redis/v9"
 )
-
-type Options struct {
-	Prefix string
-	MaxLen int64
-}
-
-type Broker struct {
-	rdb redis.UniversalClient
-	o   Options
-}
 
 func NewBroker(rdb redis.UniversalClient, o Options) *Broker {
 	if o.MaxLen <= 0 {
@@ -30,8 +21,12 @@ func NewBroker(rdb redis.UniversalClient, o Options) *Broker {
 	return &Broker{rdb: rdb, o: o}
 }
 
-func (b *Broker) stream(channel string) string  { return b.o.Prefix + "events:stream:" + channel }
-func (b *Broker) channel(channel string) string { return b.o.Prefix + "events:ch:" + channel }
+func (b *Broker) stream(channel string) string {
+	return b.o.Prefix + constants.KeyEventsStream + channel
+}
+func (b *Broker) channel(channel string) string {
+	return b.o.Prefix + constants.KeyEventsChannel + channel
+}
 
 func (b *Broker) Publish(ctx context.Context, channel, typ string, data any) (string, error) {
 	ev, err := eventsx.New(ctx, strings.SplitN(channel, ":", 2)[0], typ, data)

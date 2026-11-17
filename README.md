@@ -17,18 +17,21 @@ make run                                 # needs db-handler on :9090 (go-backend
 ## Layout
 
 ```
-cmd/server/main.go            load config + logger → build context → register routes → start jobs → run
-api/                          separate module: request/response types, scopes, topics + typed client for other services
+cmd/server/main.go            load config + logger → server.Build → run
+api/                          separate module: constants.go (paths, scopes, topics, roles), types.go, typed client for other services
 internal/
-  config/                     typed config (<name>.json, <name>-logger.json) and defaults
-  appctx/                     the service context: config, logger, prober, db client (gRPC or HTTP), redis, sessions, events
+  constants/                  app-wide constants: name, environments, probe names, Redis keys, timings
+  config/                     typed config (<name>.json, <name>-logger.json, version) and defaults
+  server/                     Build: context → HTTP app → routes → jobs
+  appctx/                     the service context; context.go holds it, db.go and redis.go build each piece
   session/                    Redis sessions: cookie → user on the context, Require(), cookie helpers
   events/                     Redis pub/sub broker with stream replay, topic ACL (scope + per-user channels)
   jobs/                       background jobs on an interval with jitter, timeout and their own correlation ID
   http/
-    routes/                   URL → middleware → controller, one Group per area
+    routes/                   api paths → middleware → controller
     controllers/              one method per endpoint: read the user, call a service, shape the response
     services/                 business logic and calls to db-handler / other services
+test/e2e/                     end-to-end tests through server.Build
 configs/*.json.sample         sample config, copied to ./var by make setup
 compose.yaml                  local Redis
 Dockerfile, make/go.mk,       from go-backend-pipelines
@@ -36,6 +39,8 @@ deploy.sh, .gitlab-ci.yml,
 .github/workflows/ci.yml
 VERSION                       image tag version (<branch>-<VERSION>)
 ```
+
+Rules: every package keeps its type declarations in `types.go` and the other files hold functions and methods. Constants shared across packages live in `internal/constants`; the REST contract's constants live in `api/constants.go`. One `_test.go` per package for unit tests, end-to-end tests in `test/e2e`. The running version comes from `version` in the config file.
 
 ## Request flow
 

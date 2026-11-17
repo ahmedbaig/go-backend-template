@@ -8,14 +8,6 @@ import (
 	"github.com/ahmedbaig/go-backend-types"
 )
 
-type Topic struct {
-	Name    string
-	Scope   string
-	PerUser bool
-}
-
-type Topics map[string]Topic
-
 func NewTopics(ts ...Topic) Topics {
 	m := Topics{}
 	for _, t := range ts {

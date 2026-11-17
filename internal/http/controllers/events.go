@@ -6,15 +6,9 @@ import (
 
 	"github.com/ahmedbaig/go-backend-http"
 	"github.com/ahmedbaig/go-backend-http/sse"
+	"github.com/ahmedbaig/go-backend-template/internal/constants"
 	"github.com/ahmedbaig/go-backend-template/internal/events"
 )
-
-type Events struct {
-	broker    *events.Broker
-	topics    events.Topics
-	heartbeat time.Duration
-	draining  <-chan struct{}
-}
 
 func NewEvents(b *events.Broker, t events.Topics, heartbeat time.Duration, draining <-chan struct{}) *Events {
 	return &Events{broker: b, topics: t, heartbeat: heartbeat, draining: draining}
@@ -37,5 +31,5 @@ func (c *Events) Stream(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	return sse.Serve(r.Context(), s, ch, sse.Options{Heartbeat: c.heartbeat, Retry: 3 * time.Second, Done: c.draining})
+	return sse.Serve(r.Context(), s, ch, sse.Options{Heartbeat: c.heartbeat, Retry: constants.SSERetry, Done: c.draining})
 }

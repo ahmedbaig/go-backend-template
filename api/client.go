@@ -6,10 +6,6 @@ import (
 	"github.com/ahmedbaig/go-backend-types/client"
 )
 
-type Client struct {
-	c *client.Client
-}
-
 func NewClient(baseURL string, opts ...client.Option) *Client {
 	return &Client{c: client.New(baseURL, opts...)}
 }

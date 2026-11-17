@@ -1,4 +1,4 @@
-package main
+package e2e
 
 import (
 	"bufio"
@@ -20,6 +20,8 @@ import (
 	"github.com/ahmedbaig/go-backend-proto/grpcx"
 	"github.com/ahmedbaig/go-backend-template/api"
 	"github.com/ahmedbaig/go-backend-template/internal/config"
+	"github.com/ahmedbaig/go-backend-template/internal/constants"
+	"github.com/ahmedbaig/go-backend-template/internal/server"
 	testkit "github.com/ahmedbaig/go-backend-testing"
 	"github.com/ahmedbaig/go-backend-types"
 	"github.com/ahmedbaig/go-backend-types/client"
@@ -48,7 +50,7 @@ func setup(t *testing.T) (*testkit.Client, *testkit.Stub, *testkit.LogCapture, h
 	c.DBHandler.Transport = "http"
 	c.DBHandler.URL = dbh.URL()
 	log, logs := testkit.Logger(t)
-	app, err := build(c, log)
+	app, err := server.Build(c, log)
 	testkit.NoError(t, err)
 	return testkit.NewClient(t, app.Handler()), dbh, logs, app.Handler()
 }
@@ -88,7 +90,7 @@ func TestDevLoginOffOutsideLocal(t *testing.T) {
 	c.DBHandler.Transport = "http"
 	c.DBHandler.URL = "http://127.0.0.1:1"
 	log, _ := testkit.Logger(t)
-	app, err := build(c, log)
+	app, err := server.Build(c, log)
 	testkit.NoError(t, err)
 	testkit.NewClient(t, app.Handler()).Post(api.PathSessionDevLogin, api.DevLoginRequest{Email: "a@example.com", Name: "A"}).ExpectError(404, httpx.CodeRouteNotFound)
 }
@@ -103,7 +105,7 @@ func TestScopes(t *testing.T) {
 	nobody.Get("/api/v1/admin/info").ExpectError(403, httpx.CodeForbidden)
 	admin := login(t, anon, []string{"admin"})
 	info := testkit.Decode[map[string]any](admin.Get("/api/v1/admin/info").Expect(200))
-	testkit.Equal(t, info["name"], any(config.Name))
+	testkit.Equal(t, info["name"], any(constants.Name))
 }
 
 func TestListPostsScopedToUser(t *testing.T) {
@@ -218,7 +220,7 @@ func TestDBHandlerOverGRPC(t *testing.T) {
 	cfg.DBHandler.GRPCAddr = lis.Addr().String()
 	cfg.DBHandler.APIKey = "svc-token"
 	log, _ := testkit.Logger(t)
-	app, err := build(cfg, log)
+	app, err := server.Build(cfg, log)
 	testkit.NoError(t, err)
 	c := login(t, testkit.NewClient(t, app.Handler()), nil, everything...).WithHeader(httpx.HeaderCorrelationID, "corr-grpc")
 

@@ -2,5 +2,11 @@
   "logDirectory": "var/logs",
   "minimumLogLevel": "debug",
   "logToFile": false,
-  "logToConsole": true
+  "logToConsole": true,
+  "logToMongo": false,
+  "mongo": {
+    "uri": "mongodb://localhost:27017",
+    "database": "go-backend-template",
+    "retentionDays": 90
+  }
 }

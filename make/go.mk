@@ -34,13 +34,13 @@ tidy: ## go mod tidy
 	go mod tidy
 
 build: ## build bin/$(APP)
-	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=$(VERSION)" -o bin/$(APP) $(CMD)
+	CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o bin/$(APP) $(CMD)
 
 run: ## run locally with CONFIG_DIR=./var
-	CONFIG_DIR=$(CONFIG_DIR) go run -ldflags="-X main.version=$(VERSION)-local" $(CMD)
+	CONFIG_DIR=$(CONFIG_DIR) go run $(CMD)
 
 docker: ## build $(IMAGE):local
-	docker build --build-arg CMD=$(CMD) --build-arg VERSION=$(VERSION) -t $(IMAGE):local .
+	docker build --build-arg CMD=$(CMD) -t $(IMAGE):local .
 
 docker-run: docker ## run $(IMAGE):local with ./var as config
 	docker run --rm -p $(PORT):$(PORT) -e PORT=$(PORT) -v $(CONFIG_DIR):/app/var/secrets:ro $(IMAGE):local

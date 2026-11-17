@@ -135,7 +135,7 @@ fi
 
 tags=(-t "$REF:$TAG")
 [ "$LATEST" = 1 ] && tags+=(-t "$REF:latest")
-args=(--build-arg "VERSION=$TAG" -f "$DOCKERFILE" "${tags[@]}")
+args=(-f "$DOCKERFILE" "${tags[@]}")
 
 if [ -n "$PLATFORM" ]; then
   out="--load"

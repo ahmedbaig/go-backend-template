@@ -11,10 +11,6 @@ import (
 	"github.com/ahmedbaig/go-backend-types"
 )
 
-type Session struct {
-	store *session.Store
-}
-
 func NewSession(store *session.Store) *Session { return &Session{store: store} }
 
 func (c *Session) Get(w http.ResponseWriter, r *http.Request) error {

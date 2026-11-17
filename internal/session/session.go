@@ -12,38 +12,22 @@ import (
 
 	"github.com/ahmedbaig/go-backend-http"
 	"github.com/ahmedbaig/go-backend-logging"
+	"github.com/ahmedbaig/go-backend-template/internal/constants"
 	"github.com/ahmedbaig/go-backend-types"
 	"github.com/redis/go-redis/v9"
 )
-
-type Options struct {
-	Prefix string
-	TTL    time.Duration
-	Cookie CookieOptions
-}
-
-type CookieOptions struct {
-	Name   string
-	Domain string
-	Secure bool
-}
-
-type Store struct {
-	rdb redis.UniversalClient
-	o   Options
-}
 
 func NewStore(rdb redis.UniversalClient, o Options) *Store {
 	if o.TTL <= 0 {
 		o.TTL = 7 * 24 * time.Hour
 	}
 	if o.Cookie.Name == "" {
-		o.Cookie.Name = "sid"
+		o.Cookie.Name = constants.CookieName
 	}
 	return &Store{rdb: rdb, o: o}
 }
 
-func (s *Store) key(sid string) string { return s.o.Prefix + "session:" + sid }
+func (s *Store) key(sid string) string { return s.o.Prefix + constants.KeySession + sid }
 
 func newSID() (string, error) {
 	b := make([]byte, 32)
@@ -85,7 +69,7 @@ func (s *Store) SetCookie(w http.ResponseWriter, sid string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.o.Cookie.Name,
 		Value:    sid,
-		Path:     "/",
+		Path:     constants.CookiePath,
 		Domain:   s.o.Cookie.Domain,
 		MaxAge:   int(s.o.TTL.Seconds()),
 		HttpOnly: true,
@@ -98,7 +82,7 @@ func (s *Store) ClearCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.o.Cookie.Name,
 		Value:    "",
-		Path:     "/",
+		Path:     constants.CookiePath,
 		Domain:   s.o.Cookie.Domain,
 		MaxAge:   -1,
 		HttpOnly: true,
@@ -114,8 +98,6 @@ func (s *Store) SID(r *http.Request) string {
 	}
 	return c.Value
 }
-
-type ctxKey struct{}
 
 func (s *Store) Load() httpx.Middleware {
 	return func(next http.Handler) http.Handler {
@@ -133,7 +115,7 @@ func (s *Store) Load() httpx.Middleware {
 			}
 			if ok {
 				ctx = types.WithUser(ctx, u)
-				ctx = logging.WithAttrs(ctx, slog.Int64("userId", u.ID))
+				ctx = logging.WithAttrs(ctx, slog.Int64("userId", u.ID), slog.String("email", u.Email), slog.Any("roles", u.Roles))
 			}
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
